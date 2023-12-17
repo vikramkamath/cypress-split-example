@@ -7,6 +7,10 @@
   "scripts": {
     "test": "cypress run",
     "badges": "npx -p dependency-version-badge update-badge cypress cypress-split",
+    "block-0": "xvfb-run -a npx cypress run --env split=3,splitIndex=0",
+    "block-1": "xvfb-run -a npx cypress run --env split=3,splitIndex=1",
+    "block-2": "xvfb-run -a npx cypress run --env split=3,splitIndex=2",
+    "parallel": "npm-run-all --parallel \"block-0\" \"block-1\" \"block-2\"",
     "debug": "DEBUG=cypress-split SPLIT=6 SPLIT_INDEX=5 npx cypress run",
     "lint": "tsc --noEmit cypress.config.ts"
   },
@@ -26,5 +30,8 @@
     "cypress-split": "1.17.1",
     "prettier": "^3.0.0",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "npm-run-all": "^4.1.5"
   }
 }
