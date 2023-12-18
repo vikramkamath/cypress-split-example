@@ -7,12 +7,16 @@
   "scripts": {
     "test": "cypress run",
     "badges": "npx -p dependency-version-badge update-badge cypress cypress-split",
-    "block-0": "SPLIT=2 SPLIT_INDEX=0 xvfb-run -a npx cypress run",
-    "block-1": "SPLIT=2 SPLIT_INDEX=1
-     xvfb-run -a npx cypress run",
-    "preparallel": "rimraf cypress/results cypress/reports",
-    "parallel": "DEBUG=find-cypress-specs:git npm-run-all --parallel \"block-0\" \"block-1\"",
-    "postparallel": "mkdirp cypress/reports && mochawesome-merge cypress/results/*.json -o cypress/reports/combined.json && marge cypress/reports/combined.json --charts true --report-dir cypress/reports --reportFilename combined",
+    "preblock-0": "mkdirp cypress/partials/block-0",
+    "block-0": "SPLIT_TIME_THRESHOLD=0.1 SPLIT_FILE=timings.json SPLIT_OUTPUT_FILE=cypress/partials/block-0/output.json SPLIT=2 SPLIT_INDEX=0 xvfb-run -a npx cypress run",
+    "preblock-1": "mkdirp cypress/partials/block-1",
+    "block-1": "SPLIT_TIME_THRESHOLD=0.1 SPLIT_FILE=timings.json SPLIT_OUTPUT_FILE=cypress/partials/block-1/output.json SPLIT=2 SPLIT_INDEX=1 xvfb-run -a npx cypress run",
+    "preparallel": "rimraf cypress/results cypress/reports cypress/partials",
+    "parallel": "npm-run-all --parallel \"block-0\" \"block-1\"",
+    "prereports": "mkdirp cypress/reports",
+    "reports:merge": "mochawesome-merge cypress/results/*.json -o cypress/reports/combined.json && marge cypress/reports/combined.json --charts true --report-dir cypress/reports --reportFilename combined",
+    "timings:merge": "npx cypress-split-merge --parent-folder cypress/partials --split-file output.json --output timings.json --set-gha-output merged-timings",
+    "postparallel": "npm-run-all --parallel \"reports:merge\" \"timings:merge\"",
     "debug": "DEBUG=cypress-split SPLIT=6 SPLIT_INDEX=5 npx cypress run",
     "lint": "tsc --noEmit cypress.config.ts"
   },
